@@ -10,7 +10,7 @@
   <main class="container">
     <header>
       <h1>Finance Record</h1>
-      <p class="subtitle">Track your income and expenses</p>
+      <p class="subtitle">Track your income, expenses, and liabilities</p>
     </header>
 
     <section class="summary">
@@ -25,6 +25,10 @@
       <div class="card expense">
         <span class="label">Expenses</span>
         <span class="value" id="total-expense">Rp 0</span>
+      </div>
+      <div class="card liability">
+        <span class="label">Liabilities</span>
+        <span class="value" id="total-liability">Rp 0</span>
       </div>
     </section>
 
@@ -47,6 +51,7 @@
             <select id="type">
               <option value="income">Income</option>
               <option value="expense">Expense</option>
+              <option value="liability">Liability</option>
             </select>
           </div>
           <div class="field">
@@ -65,6 +70,7 @@
           <button class="filter active" data-filter="all">All</button>
           <button class="filter" data-filter="income">Income</button>
           <button class="filter" data-filter="expense">Expenses</button>
+          <button class="filter" data-filter="liability">Liabilities</button>
         </div>
       </div>
       <ul id="records"></ul>

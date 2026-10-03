@@ -4,6 +4,7 @@ const emptyMsg = document.getElementById("empty-msg");
 const balanceEl = document.getElementById("balance");
 const incomeEl = document.getElementById("total-income");
 const expenseEl = document.getElementById("total-expense");
+const liabilityEl = document.getElementById("total-liability");
 const filterBtns = document.querySelectorAll(".filter");
 
 const STORAGE_KEY = "finance-records";
@@ -73,10 +74,14 @@ function render() {
   const expense = records
     .filter((r) => r.type === "expense")
     .reduce((sum, r) => sum + r.amount, 0);
+  const liability = records
+    .filter((r) => r.type === "liability")
+    .reduce((sum, r) => sum + r.amount, 0);
 
   balanceEl.textContent = formatMoney(income - expense);
   incomeEl.textContent = formatMoney(income);
   expenseEl.textContent = formatMoney(expense);
+  liabilityEl.textContent = formatMoney(liability);
 
   const visible =
     activeFilter === "all"
@@ -88,14 +93,14 @@ function render() {
 
   visible.forEach((r) => {
     const li = document.createElement("li");
-    const sign = r.type === "income" ? "+" : "-";
+    const sign = r.type === "income" ? "+ " : r.type === "expense" ? "- " : "";
     li.innerHTML = `
       <div class="record-info">
         <span class="record-desc">${escapeHtml(r.description)}</span>
         <span class="record-date">${r.date}</span>
       </div>
       <div class="record-right">
-        <span class="record-amount ${r.type}">${sign} ${formatMoney(r.amount)}</span>
+        <span class="record-amount ${r.type}">${sign}${formatMoney(r.amount)}</span>
         <button class="delete-btn" data-id="${r.id}" title="Delete">&times;</button>
       </div>`;
     recordsList.appendChild(li);

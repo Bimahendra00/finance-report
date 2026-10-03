@@ -31,7 +31,7 @@ header h1 {
 
 .summary {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 0.75rem;
   margin-bottom: 1.5rem;
 }
@@ -60,6 +60,7 @@ header h1 {
 
 .card.income .value { color: #16a34a; }
 .card.expense .value { color: #dc2626; }
+.card.liability .value { color: #d97706; }
 
 .form-section,
 .list-section {
@@ -138,6 +139,7 @@ button[type="submit"]:hover {
 
 .filters {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.4rem;
 }
 
@@ -198,6 +200,7 @@ button[type="submit"]:hover {
 
 .record-amount.income { color: #16a34a; }
 .record-amount.expense { color: #dc2626; }
+.record-amount.liability { color: #d97706; }
 
 .delete-btn {
   background: none;
@@ -216,4 +219,10 @@ button[type="submit"]:hover {
   text-align: center;
   color: #94a3b8;
   padding: 1.5rem 0;
+}
+
+@media (max-width: 560px) {
+  .summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
