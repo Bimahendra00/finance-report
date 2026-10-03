@@ -570,3 +570,74 @@ document.querySelectorAll(".tab-btn").forEach((btn) => {
     window.scrollTo(0, 0);
   });
 });
+
+// Backup: export / import ---------------------------------------------
+
+const exportBtn = document.getElementById("export-btn");
+const importBtn = document.getElementById("import-btn");
+const importFile = document.getElementById("import-file");
+
+exportBtn.addEventListener("click", () => {
+  const data = {
+    app: "finance-report",
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    records,
+    liabilities,
+    recurring,
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `finance-backup-${todayISO()}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+});
+
+importBtn.addEventListener("click", () => importFile.click());
+
+importFile.addEventListener("change", () => {
+  const file = importFile.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      if (
+        !data ||
+        !Array.isArray(data.records) ||
+        !Array.isArray(data.liabilities) ||
+        !Array.isArray(data.recurring)
+      ) {
+        throw new Error("bad shape");
+      }
+      const when = data.exportedAt ? data.exportedAt.slice(0, 10) : "unknown date";
+      if (
+        !confirm(
+          `Import backup from ${when}? This replaces all current data. ` +
+          `(${data.records.length} records, ${data.liabilities.length} liabilities, ` +
+          `${data.recurring.length} recurring bills)`
+        )
+      ) {
+        return;
+      }
+      records = data.records;
+      liabilities = data.liabilities;
+      recurring = data.recurring;
+      saveRecords();
+      saveLiabilities();
+      saveRecurring();
+      render();
+      renderLiabilities();
+      renderRecurring();
+    } catch (e) {
+      alert("That file doesn't look like a finance-report backup.");
+    } finally {
+      importFile.value = "";
+    }
+  };
+  reader.readAsText(file);
+});
