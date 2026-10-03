@@ -31,6 +31,41 @@ let recurring = loadRecurring();
 let activeFilter = "all";
 let payingId = null;
 
+// Month scope for the income/expense cards. Balance is all-time on purpose:
+// money carries over between months.
+const _today = new Date();
+let viewYear = _today.getFullYear();
+let viewMonth = _today.getMonth();
+
+const monthLabelEl = document.getElementById("month-label");
+document.getElementById("month-prev").addEventListener("click", () => shiftMonth(-1));
+document.getElementById("month-next").addEventListener("click", () => shiftMonth(1));
+monthLabelEl.addEventListener("click", resetViewMonth);
+
+function shiftMonth(delta) {
+  viewMonth += delta;
+  if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+  if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+  render();
+}
+
+function resetViewMonth() {
+  const d = new Date();
+  viewYear = d.getFullYear();
+  viewMonth = d.getMonth();
+  render();
+}
+
+function monthLabel() {
+  return new Date(viewYear, viewMonth, 1).toLocaleString("en-US", { month: "long", year: "numeric" });
+}
+
+function inViewMonth(dateStr) {
+  if (!dateStr) return false;
+  const parts = dateStr.split("-");
+  return Number(parts[0]) === viewYear && Number(parts[1]) === viewMonth + 1;
+}
+
 migrateOldLiabilityRecords();
 
 document.getElementById("date").valueAsDate = new Date();
@@ -362,16 +397,25 @@ function formatMoney(n) {
 }
 
 function render() {
-  const income = records
+  const monthRecords = records.filter((r) => inViewMonth(r.date));
+  const income = monthRecords
     .filter((r) => r.type === "income")
     .reduce((sum, r) => sum + r.amount, 0);
-  const expense = records
+  const expense = monthRecords
+    .filter((r) => r.type === "expense")
+    .reduce((sum, r) => sum + r.amount, 0);
+  // Balance carries over: all-time income minus all-time expenses.
+  const allIncome = records
+    .filter((r) => r.type === "income")
+    .reduce((sum, r) => sum + r.amount, 0);
+  const allExpense = records
     .filter((r) => r.type === "expense")
     .reduce((sum, r) => sum + r.amount, 0);
 
-  balanceEl.textContent = formatMoney(income - expense);
+  balanceEl.textContent = formatMoney(allIncome - allExpense);
   incomeEl.textContent = formatMoney(income);
   expenseEl.textContent = formatMoney(expense);
+  monthLabelEl.textContent = monthLabel();
 
   const visible =
     activeFilter === "all"

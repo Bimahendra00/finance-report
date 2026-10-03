@@ -474,3 +474,37 @@ button[type="submit"]:hover {
   font-weight: 700;
   white-space: nowrap;
 }
+
+/* Month navigator */
+
+.month-nav {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+#month-label {
+  font-weight: 700;
+  min-width: 150px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.nav-btn {
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  width: 2rem;
+  height: 2rem;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: #475569;
+  cursor: pointer;
+}
+
+.nav-btn:hover {
+  background: #f1f5f9;
+}

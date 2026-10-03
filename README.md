@@ -17,6 +17,7 @@ python3 -m http.server 8000
 ## Features
 
 - Add income / expense records with description, amount, and date
+- Monthly income/expense summary with a month navigator; balance is all-time and carries over
 - Named liabilities with remaining balances, progress bars, and per-liability payments
 - Liability payments are logged as expenses, so your balance drops too (deleting the payment restores the liability)
 - Recurring bills (monthly/weekly) as a compact checklist — checking one logs it as an expense for the period, auto-resets next period
