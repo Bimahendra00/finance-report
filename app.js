@@ -25,6 +25,37 @@ const recEmptyMsg = document.getElementById("rec-empty-msg");
 
 const moveForm = document.getElementById("move-form");
 
+// Theme: saved choice wins, otherwise follow the OS. The inline script in
+// <head> already applied it pre-paint; this just wires up the toggle.
+const themeBtn = document.getElementById("theme-toggle");
+function applyTheme(t) {
+  document.documentElement.classList.toggle("dark", t === "dark");
+  themeBtn.textContent = t === "dark" ? "☀️" : "🌙";
+  try {
+    localStorage.setItem("finance-theme", t);
+  } catch (e) {}
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute("content", t === "dark" ? "#0f172a" : "#f4f6f8");
+}
+themeBtn.addEventListener("click", () => {
+  applyTheme(document.documentElement.classList.contains("dark") ? "light" : "dark");
+});
+let initialTheme = "light";
+try {
+  initialTheme =
+    localStorage.getItem("finance-theme") ||
+    (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+} catch (e) {}
+applyTheme(initialTheme);
+
+// PWA: cache the app shell for offline use. Needs http(s) — serve via
+// `python3 -m http.server`, it won't register on file://.
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(() => {});
+  });
+}
+
 const STORAGE_KEY = "finance-records";
 const LIAB_KEY = "finance-liabilities";
 const REC_KEY = "finance-recurring";

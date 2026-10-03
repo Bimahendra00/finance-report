@@ -3,14 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#f4f6f8" />
+  <meta name="description" content="Track income, expenses, liabilities and recurring bills" />
   <title>Finance Record</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="./styles.css" />
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="./icon-192.png" />
+  <script>
+    // Apply saved theme before first paint to avoid a flash.
+    try {
+      var t = localStorage.getItem("finance-theme") ||
+        (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      if (t === "dark") document.documentElement.classList.add("dark");
+    } catch (e) {}
+  </script>
 </head>
 <body>
   <main class="container">
-    <header>
-      <h1>Finance Record</h1>
-      <p class="subtitle">Track your income, expenses, and liabilities</p>
+    <header class="app-header">
+      <div>
+        <h1>Finance Record</h1>
+        <p class="subtitle">Track your income, expenses, and liabilities</p>
+      </div>
+      <button id="theme-toggle" class="theme-btn" title="Toggle light/dark theme">🌙</button>
     </header>
 
     <section class="summary">
@@ -160,6 +176,6 @@
     </div>
   </div>
 
-  <script src="app.js"></script>
+  <script src="./app.js"></script>
 </body>
 </html>

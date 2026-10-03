@@ -1,3 +1,45 @@
+:root {
+  color-scheme: light;
+
+  --bg: #f4f6f8;
+  --text: #1c2733;
+  --card: #ffffff;
+  --muted: #64748b;
+  --faint: #94a3b8;
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --input-bg: #ffffff;
+  --track: #e2e8f0;
+  --overlay: rgba(0, 0, 0, 0.45);
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --chip-bg: #f1f5f9;
+  --filter-active-bg: #1c2733;
+  --filter-active-text: #ffffff;
+  --paid-bg: #dcfce7;
+  --paid-fg: #16a34a;
+}
+
+.dark {
+  color-scheme: dark;
+
+  --bg: #0f172a;
+  --text: #e2e8f0;
+  --card: #1e293b;
+  --muted: #94a3b8;
+  --faint: #64748b;
+  --border: #334155;
+  --border-strong: #475569;
+  --input-bg: #0f172a;
+  --track: #334155;
+  --overlay: rgba(0, 0, 0, 0.6);
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  --chip-bg: #334155;
+  --filter-active-bg: #e2e8f0;
+  --filter-active-text: #0f172a;
+  --paid-bg: #14532d;
+  --paid-fg: #4ade80;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -6,8 +48,8 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background: #f4f6f8;
-  color: #1c2733;
+  background: var(--bg);
+  color: var(--text);
   line-height: 1.5;
 }
 
@@ -17,16 +59,32 @@ body {
   padding: 2rem 1rem 4rem;
 }
 
-header {
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
   margin-bottom: 1.5rem;
 }
 
-header h1 {
+.app-header h1 {
   font-size: 1.75rem;
 }
 
 .subtitle {
-  color: #64748b;
+  color: var(--muted);
+}
+
+.theme-btn {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 1.25rem;
+  line-height: 1;
+  padding: 0.5rem 0.65rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: var(--shadow);
 }
 
 .summary {
@@ -37,10 +95,10 @@ header h1 {
 }
 
 .card {
-  background: #fff;
+  background: var(--card);
   border-radius: 12px;
   padding: 1rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
@@ -48,7 +106,7 @@ header h1 {
 
 .card .label {
   font-size: 0.8rem;
-  color: #64748b;
+  color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -61,13 +119,15 @@ header h1 {
 .card.income .value { color: #16a34a; }
 .card.expense .value { color: #dc2626; }
 .card.liability .value { color: #d97706; }
+.card.bank .value { color: #2563eb; }
+.card.cash .value { color: #16a34a; }
 
 .form-section,
 .list-section {
-  background: #fff;
+  background: var(--card);
   border-radius: 12px;
   padding: 1.25rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow);
   margin-bottom: 1.5rem;
 }
 
@@ -83,6 +143,10 @@ h2 {
   margin-bottom: 0.75rem;
 }
 
+.row.three {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
 .field {
   display: flex;
   flex-direction: column;
@@ -91,16 +155,18 @@ h2 {
 
 label {
   font-size: 0.85rem;
-  color: #475569;
+  color: var(--muted);
 }
 
 input,
 select {
   padding: 0.6rem 0.75rem;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--border-strong);
   border-radius: 8px;
   font-size: 1rem;
   width: 100%;
+  background: var(--input-bg);
+  color: var(--text);
 }
 
 input:focus,
@@ -145,17 +211,18 @@ button[type="submit"]:hover {
 
 .filter {
   padding: 0.35rem 0.7rem;
-  border: 1px solid #cbd5e1;
-  background: #fff;
+  border: 1px solid var(--border-strong);
+  background: var(--card);
+  color: var(--text);
   border-radius: 999px;
   font-size: 0.85rem;
   cursor: pointer;
 }
 
 .filter.active {
-  background: #1c2733;
-  color: #fff;
-  border-color: #1c2733;
+  background: var(--filter-active-bg);
+  color: var(--filter-active-text);
+  border-color: var(--filter-active-bg);
 }
 
 #records {
@@ -170,7 +237,7 @@ button[type="submit"]:hover {
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border);
   border-radius: 8px;
 }
 
@@ -185,7 +252,7 @@ button[type="submit"]:hover {
 
 .record-date {
   font-size: 0.8rem;
-  color: #64748b;
+  color: var(--muted);
 }
 
 .record-right {
@@ -201,11 +268,12 @@ button[type="submit"]:hover {
 .record-amount.income { color: #16a34a; }
 .record-amount.expense { color: #dc2626; }
 .record-amount.liability { color: #d97706; }
+.record-amount.transfer { color: var(--muted); }
 
 .delete-btn {
   background: none;
   border: none;
-  color: #94a3b8;
+  color: var(--faint);
   font-size: 1.1rem;
   cursor: pointer;
   padding: 0.25rem;
@@ -217,7 +285,7 @@ button[type="submit"]:hover {
 
 .empty {
   text-align: center;
-  color: #94a3b8;
+  color: var(--faint);
   padding: 1.5rem 0;
 }
 
@@ -225,15 +293,19 @@ button[type="submit"]:hover {
   .summary {
     grid-template-columns: repeat(2, 1fr);
   }
+  .row,
+  .row.three {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Liabilities */
 
 .liab-section {
-  background: #fff;
+  background: var(--card);
   border-radius: 12px;
   padding: 1.25rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow);
   margin-bottom: 1.5rem;
 }
 
@@ -251,7 +323,7 @@ button[type="submit"]:hover {
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border);
   border-radius: 8px;
 }
 
@@ -264,7 +336,7 @@ button[type="submit"]:hover {
 
 .progress {
   height: 6px;
-  background: #e2e8f0;
+  background: var(--track);
   border-radius: 999px;
   overflow: hidden;
 }
@@ -283,8 +355,8 @@ button[type="submit"]:hover {
 .paid-badge {
   font-size: 0.7rem;
   font-weight: 700;
-  color: #16a34a;
-  background: #dcfce7;
+  color: var(--paid-fg);
+  background: var(--paid-bg);
   border-radius: 999px;
   padding: 0.1rem 0.5rem;
   margin-left: 0.4rem;
@@ -311,7 +383,7 @@ button[type="submit"]:hover {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
+  background: var(--overlay);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -324,7 +396,7 @@ button[type="submit"]:hover {
 }
 
 .modal {
-  background: #fff;
+  background: var(--card);
   border-radius: 12px;
   padding: 1.5rem;
   width: 100%;
@@ -337,7 +409,7 @@ button[type="submit"]:hover {
 }
 
 .modal-sub {
-  color: #64748b;
+  color: var(--muted);
   font-size: 0.9rem;
   margin-bottom: 1rem;
 }
@@ -369,26 +441,26 @@ button[type="submit"]:hover {
 }
 
 .btn-secondary {
-  background: #f1f5f9;
-  color: #1c2733;
+  background: var(--chip-bg);
+  color: var(--text);
 }
 
 .btn-secondary:hover {
-  background: #e2e8f0;
+  background: var(--border);
 }
 
 /* Recurring */
 
 .rec-section {
-  background: #fff;
+  background: var(--card);
   border-radius: 12px;
   padding: 1.25rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow);
   margin-bottom: 1.5rem;
 }
 
 .hint {
-  color: #94a3b8;
+  color: var(--faint);
   font-size: 0.85rem;
   margin-bottom: 0.75rem;
 }
@@ -403,9 +475,11 @@ button[type="submit"]:hover {
 .inline-form input,
 .inline-form select {
   padding: 0.6rem 0.75rem;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--border-strong);
   border-radius: 8px;
   font-size: 0.95rem;
+  background: var(--input-bg);
+  color: var(--text);
 }
 
 .inline-form #rec-name {
@@ -438,7 +512,7 @@ button[type="submit"]:hover {
   align-items: center;
   gap: 0.75rem;
   padding: 0.5rem 0.75rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border);
   border-radius: 8px;
 }
 
@@ -461,68 +535,16 @@ button[type="submit"]:hover {
 }
 
 .rec-item.paid .rec-name {
-  color: #94a3b8;
+  color: var(--faint);
   text-decoration: line-through;
 }
 
 .rec-meta {
   font-size: 0.75rem;
-  color: #94a3b8;
+  color: var(--faint);
 }
 
 .rec-amount {
   font-weight: 700;
   white-space: nowrap;
-}
-
-/* Bank / cash pockets */
-
-.card.bank .value { color: #2563eb; }
-.card.cash .value { color: #16a34a; }
-
-.record-amount.transfer { color: #64748b; }
-
-.row.three {
-  grid-template-columns: 1fr 1fr 1fr;
-}
-
-@media (max-width: 560px) {
-  .row,
-  .row.three {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* Month navigator */
-
-.month-nav {
-  grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  margin-bottom: 0.25rem;
-}
-
-#month-label {
-  font-weight: 700;
-  min-width: 150px;
-  text-align: center;
-  cursor: pointer;
-}
-
-.nav-btn {
-  background: #fff;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  width: 2rem;
-  height: 2rem;
-  font-size: 1.1rem;
-  line-height: 1;
-  color: #475569;
-  cursor: pointer;
-}
-
-.nav-btn:hover {
-  background: #f1f5f9;
 }

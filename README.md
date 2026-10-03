@@ -14,6 +14,10 @@ python3 -m http.server 8000
 # then visit http://localhost:8000
 ```
 
+Served over `http://localhost` (not `file://`), it works as an installable
+PWA: the service worker caches the app shell for offline use, and browsers
+offer "Install app" for a fullscreen home-screen icon.
+
 ## Features
 
 - Add income / expense records with description, amount, date, and account (bank or cash)
