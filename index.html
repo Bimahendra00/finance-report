@@ -28,136 +28,144 @@
       <button id="theme-toggle" class="theme-btn" title="Toggle light/dark theme">🌙</button>
     </header>
 
-    <section class="summary">
-      <div class="month-nav">
-        <button id="month-prev" class="nav-btn" title="Previous month">‹</button>
-        <span id="month-label" title="Back to current month"></span>
-        <button id="month-next" class="nav-btn" title="Next month">›</button>
-      </div>
-      <div class="card">
-        <span class="label">Balance</span>
-        <span class="value" id="balance">Rp 0</span>
-      </div>
-      <div class="card bank">
-        <span class="label">Bank</span>
-        <span class="value" id="total-bank">Rp 0</span>
-      </div>
-      <div class="card cash">
-        <span class="label">Cash</span>
-        <span class="value" id="total-cash">Rp 0</span>
-      </div>
-      <div class="card income">
-        <span class="label">Income</span>
-        <span class="value" id="total-income">Rp 0</span>
-      </div>
-      <div class="card expense">
-        <span class="label">Expenses</span>
-        <span class="value" id="total-expense">Rp 0</span>
-      </div>
-      <div class="card liability">
-        <span class="label">Liabilities</span>
-        <span class="value" id="total-liability">Rp 0</span>
-      </div>
-    </section>
+    <div class="tab-page active" id="page-home">
+      <section class="summary">
+        <div class="month-nav">
+          <button id="month-prev" class="nav-btn" title="Previous month">‹</button>
+          <span id="month-label" title="Back to current month"></span>
+          <button id="month-next" class="nav-btn" title="Next month">›</button>
+        </div>
+        <div class="card">
+          <span class="label">Balance</span>
+          <span class="value" id="balance">Rp 0</span>
+        </div>
+        <div class="card bank">
+          <span class="label">Bank</span>
+          <span class="value" id="total-bank">Rp 0</span>
+        </div>
+        <div class="card cash">
+          <span class="label">Cash</span>
+          <span class="value" id="total-cash">Rp 0</span>
+        </div>
+        <div class="card income">
+          <span class="label">Income</span>
+          <span class="value" id="total-income">Rp 0</span>
+        </div>
+        <div class="card expense">
+          <span class="label">Expenses</span>
+          <span class="value" id="total-expense">Rp 0</span>
+        </div>
+        <div class="card liability">
+          <span class="label">Liabilities</span>
+          <span class="value" id="total-liability">Rp 0</span>
+        </div>
+      </section>
 
-    <section class="form-section">
-      <h2>Add record</h2>
-      <form id="record-form">
-        <div class="row">
-          <div class="field">
-            <label for="description">Description</label>
-            <input type="text" id="description" placeholder="e.g. Salary, Groceries" required />
+      <section class="form-section">
+        <h2>Add record</h2>
+        <form id="record-form">
+          <div class="row">
+            <div class="field">
+              <label for="description">Description</label>
+              <input type="text" id="description" placeholder="e.g. Salary, Groceries" required />
+            </div>
+            <div class="field">
+              <label for="amount">Amount</label>
+              <input type="text" id="amount" inputmode="decimal" placeholder="e.g. 1.500.000" required />
+            </div>
           </div>
-          <div class="field">
-            <label for="amount">Amount</label>
-            <input type="text" id="amount" inputmode="decimal" placeholder="e.g. 1.500.000" required />
+          <div class="row three">
+            <div class="field">
+              <label for="type">Type</label>
+              <select id="type">
+                <option value="income">Income</option>
+                <option value="expense">Expense</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="account">Account</label>
+              <select id="account">
+                <option value="bank">Bank</option>
+                <option value="cash">Cash</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="date">Date</label>
+              <input type="date" id="date" required />
+            </div>
+          </div>
+          <button type="submit">Add record</button>
+        </form>
+      </section>
+
+      <section class="rec-section">
+        <h2>Move money</h2>
+        <p class="hint">Shift money between bank and cash — not income, not an expense.</p>
+        <form id="move-form" class="inline-form">
+          <input type="text" id="move-amount" inputmode="decimal" placeholder="100.000" required />
+          <select id="move-direction">
+            <option value="bank-cash">Bank → Cash</option>
+            <option value="cash-bank">Cash → Bank</option>
+          </select>
+          <button type="submit" class="btn-primary">Move</button>
+        </form>
+      </section>
+    </div>
+
+    <div class="tab-page" id="page-records">
+      <section class="list-section">
+        <div class="list-header">
+          <h2>Records</h2>
+          <div class="filters">
+            <button class="filter active" data-filter="all">All</button>
+            <button class="filter" data-filter="income">Income</button>
+            <button class="filter" data-filter="expense">Expenses</button>
+            <button class="filter" data-filter="transfer">Transfers</button>
           </div>
         </div>
-        <div class="row three">
-          <div class="field">
-            <label for="type">Type</label>
-            <select id="type">
-              <option value="income">Income</option>
-              <option value="expense">Expense</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="account">Account</label>
-            <select id="account">
-              <option value="bank">Bank</option>
-              <option value="cash">Cash</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="date">Date</label>
-            <input type="date" id="date" required />
-          </div>
-        </div>
-        <button type="submit">Add record</button>
-      </form>
-    </section>
+        <ul id="records"></ul>
+        <p class="empty" id="empty-msg">No records yet. Add your first one above.</p>
+      </section>
+    </div>
 
-    <section class="rec-section">
-      <h2>Move money</h2>
-      <p class="hint">Shift money between bank and cash — not income, not an expense.</p>
-      <form id="move-form" class="inline-form">
-        <input type="text" id="move-amount" inputmode="decimal" placeholder="100.000" required />
-        <select id="move-direction">
-          <option value="bank-cash">Bank → Cash</option>
-          <option value="cash-bank">Cash → Bank</option>
-        </select>
-        <button type="submit" class="btn-primary">Move</button>
-      </form>
-    </section>
-
-    <section class="liab-section">
-      <h2>Liabilities</h2>
-      <form id="liability-form">
-        <div class="row">
-          <div class="field">
-            <label for="liab-name">Name</label>
-            <input type="text" id="liab-name" placeholder="e.g. Motor loan" required />
+    <div class="tab-page" id="page-debts">
+      <section class="liab-section">
+        <h2>Liabilities</h2>
+        <form id="liability-form">
+          <div class="row">
+            <div class="field">
+              <label for="liab-name">Name</label>
+              <input type="text" id="liab-name" placeholder="e.g. Motor loan" required />
+            </div>
+            <div class="field">
+              <label for="liab-amount">Amount owed</label>
+              <input type="text" id="liab-amount" inputmode="decimal" placeholder="e.g. 1.500.000" required />
+            </div>
           </div>
-          <div class="field">
-            <label for="liab-amount">Amount owed</label>
-            <input type="text" id="liab-amount" inputmode="decimal" placeholder="e.g. 1.500.000" required />
-          </div>
-        </div>
-        <button type="submit">Add liability</button>
-      </form>
-      <ul id="liabilities"></ul>
-      <p class="empty" id="liab-empty-msg">No liabilities. Add one above.</p>
-    </section>
+          <button type="submit">Add liability</button>
+        </form>
+        <ul id="liabilities"></ul>
+        <p class="empty" id="liab-empty-msg">No liabilities. Add one above.</p>
+      </section>
+    </div>
 
-    <section class="rec-section">
-      <h2>Recurring</h2>
-      <p class="hint">Checking an item logs it as an expense for this period.</p>
-      <form id="recurring-form" class="inline-form">
-        <input type="text" id="rec-name" placeholder="Name — e.g. Internet" required />
-        <input type="text" id="rec-amount" inputmode="decimal" placeholder="350.000" required />
-        <select id="rec-period">
-          <option value="monthly">Monthly</option>
-          <option value="weekly">Weekly</option>
-        </select>
-        <button type="submit" class="btn-primary">Add</button>
-      </form>
-      <ul id="recurring"></ul>
-      <p class="empty" id="rec-empty-msg">No recurring bills. Add one above.</p>
-    </section>
-
-    <section class="list-section">
-      <div class="list-header">
-        <h2>Records</h2>
-        <div class="filters">
-          <button class="filter active" data-filter="all">All</button>
-          <button class="filter" data-filter="income">Income</button>
-          <button class="filter" data-filter="expense">Expenses</button>
-          <button class="filter" data-filter="transfer">Transfers</button>
-        </div>
-      </div>
-      <ul id="records"></ul>
-      <p class="empty" id="empty-msg">No records yet. Add your first one above.</p>
-    </section>
+    <div class="tab-page" id="page-bills">
+      <section class="rec-section">
+        <h2>Recurring</h2>
+        <p class="hint">Checking an item logs it as an expense for this period.</p>
+        <form id="recurring-form" class="inline-form">
+          <input type="text" id="rec-name" placeholder="Name — e.g. Internet" required />
+          <input type="text" id="rec-amount" inputmode="decimal" placeholder="350.000" required />
+          <select id="rec-period">
+            <option value="monthly">Monthly</option>
+            <option value="weekly">Weekly</option>
+          </select>
+          <button type="submit" class="btn-primary">Add</button>
+        </form>
+        <ul id="recurring"></ul>
+        <p class="empty" id="rec-empty-msg">No recurring bills. Add one above.</p>
+      </section>
+    </div>
   </main>
 
   <div class="modal-overlay" id="pay-modal" hidden>
@@ -174,6 +182,21 @@
       </div>
     </div>
   </div>
+
+  <nav class="tabbar">
+    <button class="tab-btn active" data-tab="home">
+      <span class="tab-icon">🏠</span><span class="tab-label">Home</span>
+    </button>
+    <button class="tab-btn" data-tab="records">
+      <span class="tab-icon">🧾</span><span class="tab-label">Records</span>
+    </button>
+    <button class="tab-btn" data-tab="debts">
+      <span class="tab-icon">💳</span><span class="tab-label">Debts</span>
+    </button>
+    <button class="tab-btn" data-tab="bills">
+      <span class="tab-icon">🔁</span><span class="tab-label">Bills</span>
+    </button>
+  </nav>
 
   <script src="./app.js"></script>
 </body>

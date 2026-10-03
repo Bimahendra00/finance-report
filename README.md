@@ -20,6 +20,10 @@ offer "Install app" for a fullscreen home-screen icon.
 
 ## Features
 
+- Phone-style bottom tab navigation: Home, Records, Debts, Bills
+- Light/dark theme (follows system, toggle in header)
+- Installable PWA with offline support
+
 - Add income / expense records with description, amount, date, and account (bank or cash)
 - Move money between bank and cash as transfers — not income, not an expense
 - Bank / cash / total balance cards; monthly income/expense summary with a month navigator

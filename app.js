@@ -558,3 +558,15 @@ function escapeHtml(s) {
 render();
 renderLiabilities();
 renderRecurring();
+
+// Bottom tab navigation ----------------------------------------------
+
+document.querySelectorAll(".tab-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
+    document.querySelectorAll(".tab-page").forEach((p) => p.classList.remove("active"));
+    document.getElementById("page-" + btn.dataset.tab).classList.add("active");
+    window.scrollTo(0, 0);
+  });
+});
