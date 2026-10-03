@@ -89,9 +89,38 @@ body {
 
 .summary {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 0.75rem;
   margin-bottom: 1.5rem;
+}
+
+.month-nav {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+}
+
+#month-label {
+  font-weight: 700;
+  font-size: 1.05rem;
+  cursor: pointer;
+  min-width: 11rem;
+  text-align: center;
+}
+
+.nav-btn {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: var(--ink);
+  cursor: pointer;
+  box-shadow: var(--shadow);
 }
 
 .card {
