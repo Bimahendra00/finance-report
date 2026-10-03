@@ -17,11 +17,17 @@ const payAmountInput = document.getElementById("pay-amount");
 const payConfirmBtn = document.getElementById("pay-confirm");
 const payCancelBtn = document.getElementById("pay-cancel");
 
+const recForm = document.getElementById("recurring-form");
+const recList = document.getElementById("recurring");
+const recEmptyMsg = document.getElementById("rec-empty-msg");
+
 const STORAGE_KEY = "finance-records";
 const LIAB_KEY = "finance-liabilities";
+const REC_KEY = "finance-recurring";
 
 let records = loadRecords();
 let liabilities = loadLiabilities();
+let recurring = loadRecurring();
 let activeFilter = "all";
 let payingId = null;
 
@@ -70,6 +76,15 @@ recordsList.addEventListener("click", (e) => {
       liab.remaining = Math.min(liab.total, liab.remaining + rec.amount);
       saveLiabilities();
       renderLiabilities();
+    }
+  }
+  // Deleting a recurring payment unchecks it for the period.
+  if (rec && rec.recurringId) {
+    const item = recurring.find((r) => r.id === rec.recurringId);
+    if (item && item.lastPaid === rec.period) {
+      item.lastPaid = null;
+      saveRecurring();
+      renderRecurring();
     }
   }
   records = records.filter((r) => r.id !== id);
@@ -158,9 +173,107 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && !payModal.hidden) closePayModal();
 });
 
+// Recurring bills ------------------------------------------------------
+
+recForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const name = document.getElementById("rec-name").value.trim();
+  const amount = parseAmount(document.getElementById("rec-amount").value);
+  const period = document.getElementById("rec-period").value;
+  if (!name || isNaN(amount) || amount <= 0) return;
+  recurring.unshift({ id: Date.now(), name, amount, period, lastPaid: null });
+  saveRecurring();
+  renderRecurring();
+  recForm.reset();
+});
+
+recList.addEventListener("change", (e) => {
+  const cb = e.target.closest('input[type="checkbox"]');
+  if (!cb) return;
+  const id = Number(cb.dataset.id);
+  const item = recurring.find((r) => r.id === id);
+  if (!item) return;
+  const key = currentPeriodKey(item.period);
+  if (cb.checked) {
+    item.lastPaid = key;
+    records.unshift({
+      id: Date.now(),
+      description: item.name,
+      amount: item.amount,
+      type: "expense",
+      date: todayISO(),
+      recurringId: item.id,
+      period: key,
+    });
+  } else {
+    // Unchecking removes this period's expense.
+    records = records.filter(
+      (r) => !(r.recurringId === item.id && r.period === key)
+    );
+    item.lastPaid = null;
+  }
+  saveRecords();
+  saveRecurring();
+  render();
+  renderRecurring();
+});
+
+recList.addEventListener("click", (e) => {
+  const delBtn = e.target.closest(".delete-btn");
+  if (!delBtn) return;
+  const id = Number(delBtn.dataset.id);
+  const item = recurring.find((r) => r.id === id);
+  if (item && confirm(`Delete "${item.name}"?`)) {
+    const key = currentPeriodKey(item.period);
+    records = records.filter(
+      (r) => !(r.recurringId === id && r.period === key)
+    );
+    recurring = recurring.filter((r) => r.id !== id);
+    saveRecords();
+    saveRecurring();
+    render();
+    renderRecurring();
+  }
+});
+
+function renderRecurring() {
+  recList.innerHTML = "";
+  recEmptyMsg.style.display = recurring.length ? "none" : "block";
+
+  recurring.forEach((item) => {
+    const paid = item.lastPaid === currentPeriodKey(item.period);
+    const li = document.createElement("li");
+    li.className = "rec-item" + (paid ? " paid" : "");
+    li.innerHTML = `
+      <input type="checkbox" data-id="${item.id}" ${paid ? "checked" : ""} />
+      <div class="rec-info">
+        <span class="rec-name">${escapeHtml(item.name)}</span>
+        <span class="rec-meta">${item.period === "weekly" ? "Weekly" : "Monthly"}</span>
+      </div>
+      <span class="rec-amount">${formatMoney(item.amount)}</span>
+      <button class="delete-btn" data-id="${item.id}" title="Delete">&times;</button>`;
+    recList.appendChild(li);
+  });
+}
+
+// "2026-10" for monthly, "2026-W40" for weekly. Checked state is derived
+// from lastPaid, so a new period automatically unchecks everything.
+function currentPeriodKey(period) {
+  const d = new Date();
+  if (period === "weekly") {
+    const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    const dayNum = date.getUTCDay() || 7;
+    date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+    const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+    const week = Math.ceil(((date - yearStart) / 86400000 + 1) / 7);
+    return `${date.getUTCFullYear()}-W${String(week).padStart(2, "0")}`;
+  }
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
 // Format amount fields with thousand separators on blur,
 // so what you typed is easy to verify.
-["amount", "liab-amount", "pay-amount"].forEach((id) => {
+["amount", "liab-amount", "pay-amount", "rec-amount"].forEach((id) => {
   document.getElementById(id).addEventListener("blur", (e) => {
     if (e.target.value.trim()) e.target.value = formatInputAmount(e.target.value);
   });
@@ -182,12 +295,24 @@ function loadLiabilities() {
   }
 }
 
+function loadRecurring() {
+  try {
+    return JSON.parse(localStorage.getItem(REC_KEY)) || [];
+  } catch {
+    return [];
+  }
+}
+
 function saveRecords() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
 }
 
 function saveLiabilities() {
   localStorage.setItem(LIAB_KEY, JSON.stringify(liabilities));
+}
+
+function saveRecurring() {
+  localStorage.setItem(REC_KEY, JSON.stringify(recurring));
 }
 
 // One-time migration from the old flat "liability" record type
@@ -311,3 +436,4 @@ function escapeHtml(s) {
 
 render();
 renderLiabilities();
+renderRecurring();

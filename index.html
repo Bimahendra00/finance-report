@@ -81,6 +81,22 @@
       <p class="empty" id="liab-empty-msg">No liabilities. Add one above.</p>
     </section>
 
+    <section class="rec-section">
+      <h2>Recurring</h2>
+      <p class="hint">Checking an item logs it as an expense for this period.</p>
+      <form id="recurring-form" class="inline-form">
+        <input type="text" id="rec-name" placeholder="Name — e.g. Internet" required />
+        <input type="text" id="rec-amount" inputmode="decimal" placeholder="350.000" required />
+        <select id="rec-period">
+          <option value="monthly">Monthly</option>
+          <option value="weekly">Weekly</option>
+        </select>
+        <button type="submit" class="btn-primary">Add</button>
+      </form>
+      <ul id="recurring"></ul>
+      <p class="empty" id="rec-empty-msg">No recurring bills. Add one above.</p>
+    </section>
+
     <section class="list-section">
       <div class="list-header">
         <h2>Records</h2>

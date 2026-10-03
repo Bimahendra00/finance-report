@@ -376,3 +376,101 @@ button[type="submit"]:hover {
 .btn-secondary:hover {
   background: #e2e8f0;
 }
+
+/* Recurring */
+
+.rec-section {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  margin-bottom: 1.5rem;
+}
+
+.hint {
+  color: #94a3b8;
+  font-size: 0.85rem;
+  margin-bottom: 0.75rem;
+}
+
+.inline-form {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+.inline-form input,
+.inline-form select {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+
+.inline-form #rec-name {
+  flex: 2 1 140px;
+}
+
+.inline-form #rec-amount {
+  flex: 1 1 90px;
+}
+
+.inline-form #rec-period {
+  flex: 0 1 auto;
+}
+
+.inline-form .btn-primary {
+  flex: 0 0 auto;
+  padding: 0.6rem 1.1rem;
+}
+
+#recurring {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 0.75rem;
+}
+
+.rec-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.rec-item input[type="checkbox"] {
+  width: 1.15rem;
+  height: 1.15rem;
+  accent-color: #2563eb;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.rec-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.rec-name {
+  font-weight: 600;
+}
+
+.rec-item.paid .rec-name {
+  color: #94a3b8;
+  text-decoration: line-through;
+}
+
+.rec-meta {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.rec-amount {
+  font-weight: 700;
+  white-space: nowrap;
+}
