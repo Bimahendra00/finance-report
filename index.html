@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Finance Record</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="container">
+    <header>
+      <h1>Finance Record</h1>
+      <p class="subtitle">Track your income and expenses</p>
+    </header>
+
+    <section class="summary">
+      <div class="card">
+        <span class="label">Balance</span>
+        <span class="value" id="balance">Rp 0</span>
+      </div>
+      <div class="card income">
+        <span class="label">Income</span>
+        <span class="value" id="total-income">Rp 0</span>
+      </div>
+      <div class="card expense">
+        <span class="label">Expenses</span>
+        <span class="value" id="total-expense">Rp 0</span>
+      </div>
+    </section>
+
+    <section class="form-section">
+      <h2>Add record</h2>
+      <form id="record-form">
+        <div class="row">
+          <div class="field">
+            <label for="description">Description</label>
+            <input type="text" id="description" placeholder="e.g. Salary, Groceries" required />
+          </div>
+          <div class="field">
+            <label for="amount">Amount</label>
+            <input type="number" id="amount" min="1" step="any" placeholder="0" required />
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="type">Type</label>
+            <select id="type">
+              <option value="income">Income</option>
+              <option value="expense">Expense</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="date">Date</label>
+            <input type="date" id="date" required />
+          </div>
+        </div>
+        <button type="submit">Add record</button>
+      </form>
+    </section>
+
+    <section class="list-section">
+      <div class="list-header">
+        <h2>Records</h2>
+        <div class="filters">
+          <button class="filter active" data-filter="all">All</button>
+          <button class="filter" data-filter="income">Income</button>
+          <button class="filter" data-filter="expense">Expenses</button>
+        </div>
+      </div>
+      <ul id="records"></ul>
+      <p class="empty" id="empty-msg">No records yet. Add your first one above.</p>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
