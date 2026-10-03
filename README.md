@@ -18,6 +18,8 @@ python3 -m http.server 8000
 
 - Add income / expense records with description, amount, and date
 - Named liabilities with remaining balances, progress bars, and per-liability payments
+- Liability payments are logged as expenses, so your balance drops too (deleting the payment restores the liability)
+- Amount fields accept Indonesian thousand separators (`1.500.000`) and decimal comma (`1.500,50`)
 - Live balance, income, expense, and total-liability figures
 - Filter records by type
 - Delete records and liabilities

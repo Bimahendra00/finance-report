@@ -35,7 +35,7 @@ form.addEventListener("submit", (e) => {
   const record = {
     id: Date.now(),
     description: document.getElementById("description").value.trim(),
-    amount: parseFloat(document.getElementById("amount").value),
+    amount: parseAmount(document.getElementById("amount").value),
     type: document.getElementById("type").value,
     date: document.getElementById("date").value,
   };
@@ -61,7 +61,18 @@ filterBtns.forEach((btn) => {
 recordsList.addEventListener("click", (e) => {
   const btn = e.target.closest(".delete-btn");
   if (!btn) return;
-  records = records.filter((r) => r.id !== Number(btn.dataset.id));
+  const id = Number(btn.dataset.id);
+  const rec = records.find((r) => r.id === id);
+  // Reversing a liability payment restores the liability balance.
+  if (rec && rec.liabilityId) {
+    const liab = liabilities.find((l) => l.id === rec.liabilityId);
+    if (liab) {
+      liab.remaining = Math.min(liab.total, liab.remaining + rec.amount);
+      saveLiabilities();
+      renderLiabilities();
+    }
+  }
+  records = records.filter((r) => r.id !== id);
   saveRecords();
   render();
 });
@@ -69,7 +80,7 @@ recordsList.addEventListener("click", (e) => {
 liabForm.addEventListener("submit", (e) => {
   e.preventDefault();
   const name = document.getElementById("liab-name").value.trim();
-  const amount = parseFloat(document.getElementById("liab-amount").value);
+  const amount = parseAmount(document.getElementById("liab-amount").value);
   if (!name || isNaN(amount) || amount <= 0) return;
   liabilities.unshift({ id: Date.now(), name, total: amount, remaining: amount });
   saveLiabilities();
@@ -113,10 +124,22 @@ function closePayModal() {
 
 payConfirmBtn.addEventListener("click", () => {
   const liab = liabilities.find((l) => l.id === payingId);
-  const amount = parseFloat(payAmountInput.value);
+  const amount = parseAmount(payAmountInput.value);
   if (!liab || isNaN(amount) || amount <= 0) return;
-  liab.remaining = Math.max(0, liab.remaining - amount);
+  const paid = Math.min(amount, liab.remaining);
+  liab.remaining -= paid;
+  // A payment is money out, so it also lands in expenses.
+  records.unshift({
+    id: Date.now(),
+    description: `Pay ${liab.name}`,
+    amount: paid,
+    type: "expense",
+    date: todayISO(),
+    liabilityId: liab.id,
+  });
+  saveRecords();
   saveLiabilities();
+  render();
   renderLiabilities();
   closePayModal();
 });
@@ -133,6 +156,14 @@ payModal.addEventListener("click", (e) => {
 
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && !payModal.hidden) closePayModal();
+});
+
+// Format amount fields with thousand separators on blur,
+// so what you typed is easy to verify.
+["amount", "liab-amount", "pay-amount"].forEach((id) => {
+  document.getElementById(id).addEventListener("blur", (e) => {
+    if (e.target.value.trim()) e.target.value = formatInputAmount(e.target.value);
+  });
 });
 
 function loadRecords() {
@@ -175,6 +206,30 @@ function migrateOldLiabilityRecords() {
   records = records.filter((r) => r.type !== "liability");
   saveRecords();
   saveLiabilities();
+}
+
+// Parses Indonesian-formatted amounts: dots are thousand separators,
+// comma is the decimal separator.
+// "1.500.000" -> 1500000, "1.500,50" -> 1500.5
+function parseAmount(str) {
+  const cleaned = String(str).trim().replace(/\./g, "").replace(",", ".");
+  const n = parseFloat(cleaned);
+  return isNaN(n) ? NaN : n;
+}
+
+function formatInputAmount(str) {
+  const n = parseAmount(str);
+  if (isNaN(n)) return str;
+  const [intPart, decPart] = String(n).split(".");
+  const grouped = Number(intPart).toLocaleString("id-ID");
+  return decPart ? grouped + "," + decPart : grouped;
+}
+
+function todayISO() {
+  const d = new Date();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${m}-${day}`;
 }
 
 function formatMoney(n) {
