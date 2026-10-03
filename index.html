@@ -23,6 +23,14 @@
         <span class="label">Balance</span>
         <span class="value" id="balance">Rp 0</span>
       </div>
+      <div class="card bank">
+        <span class="label">Bank</span>
+        <span class="value" id="total-bank">Rp 0</span>
+      </div>
+      <div class="card cash">
+        <span class="label">Cash</span>
+        <span class="value" id="total-cash">Rp 0</span>
+      </div>
       <div class="card income">
         <span class="label">Income</span>
         <span class="value" id="total-income">Rp 0</span>
@@ -50,7 +58,7 @@
             <input type="text" id="amount" inputmode="decimal" placeholder="e.g. 1.500.000" required />
           </div>
         </div>
-        <div class="row">
+        <div class="row three">
           <div class="field">
             <label for="type">Type</label>
             <select id="type">
@@ -59,11 +67,31 @@
             </select>
           </div>
           <div class="field">
+            <label for="account">Account</label>
+            <select id="account">
+              <option value="bank">Bank</option>
+              <option value="cash">Cash</option>
+            </select>
+          </div>
+          <div class="field">
             <label for="date">Date</label>
             <input type="date" id="date" required />
           </div>
         </div>
         <button type="submit">Add record</button>
+      </form>
+    </section>
+
+    <section class="rec-section">
+      <h2>Move money</h2>
+      <p class="hint">Shift money between bank and cash — not income, not an expense.</p>
+      <form id="move-form" class="inline-form">
+        <input type="text" id="move-amount" inputmode="decimal" placeholder="100.000" required />
+        <select id="move-direction">
+          <option value="bank-cash">Bank → Cash</option>
+          <option value="cash-bank">Cash → Bank</option>
+        </select>
+        <button type="submit" class="btn-primary">Move</button>
       </form>
     </section>
 
@@ -109,6 +137,7 @@
           <button class="filter active" data-filter="all">All</button>
           <button class="filter" data-filter="income">Income</button>
           <button class="filter" data-filter="expense">Expenses</button>
+          <button class="filter" data-filter="transfer">Transfers</button>
         </div>
       </div>
       <ul id="records"></ul>

@@ -2,6 +2,8 @@ const form = document.getElementById("record-form");
 const recordsList = document.getElementById("records");
 const emptyMsg = document.getElementById("empty-msg");
 const balanceEl = document.getElementById("balance");
+const bankEl = document.getElementById("total-bank");
+const cashEl = document.getElementById("total-cash");
 const incomeEl = document.getElementById("total-income");
 const expenseEl = document.getElementById("total-expense");
 const liabilityEl = document.getElementById("total-liability");
@@ -20,6 +22,8 @@ const payCancelBtn = document.getElementById("pay-cancel");
 const recForm = document.getElementById("recurring-form");
 const recList = document.getElementById("recurring");
 const recEmptyMsg = document.getElementById("rec-empty-msg");
+
+const moveForm = document.getElementById("move-form");
 
 const STORAGE_KEY = "finance-records";
 const LIAB_KEY = "finance-liabilities";
@@ -78,6 +82,7 @@ form.addEventListener("submit", (e) => {
     description: document.getElementById("description").value.trim(),
     amount: parseAmount(document.getElementById("amount").value),
     type: document.getElementById("type").value,
+    account: document.getElementById("account").value,
     date: document.getElementById("date").value,
   };
 
@@ -88,6 +93,26 @@ form.addEventListener("submit", (e) => {
   render();
   form.reset();
   document.getElementById("date").valueAsDate = new Date();
+});
+
+// Transfers move money between pockets: not income, not an expense.
+moveForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const amount = parseAmount(document.getElementById("move-amount").value);
+  if (isNaN(amount) || amount <= 0) return;
+  const [from, to] = document.getElementById("move-direction").value.split("-");
+  records.unshift({
+    id: Date.now(),
+    description: from === "bank" ? "Cash withdrawal" : "Cash deposit",
+    amount,
+    type: "transfer",
+    date: todayISO(),
+    from,
+    to,
+  });
+  saveRecords();
+  render();
+  moveForm.reset();
 });
 
 filterBtns.forEach((btn) => {
@@ -308,7 +333,7 @@ function currentPeriodKey(period) {
 
 // Format amount fields with thousand separators on blur,
 // so what you typed is easy to verify.
-["amount", "liab-amount", "pay-amount", "rec-amount"].forEach((id) => {
+["amount", "liab-amount", "pay-amount", "rec-amount", "move-amount"].forEach((id) => {
   document.getElementById(id).addEventListener("blur", (e) => {
     if (e.target.value.trim()) e.target.value = formatInputAmount(e.target.value);
   });
@@ -396,6 +421,24 @@ function formatMoney(n) {
   return "Rp " + n.toLocaleString("id-ID");
 }
 
+// Balances per pocket. Old records without an account count as bank.
+// Transfers cancel out of the total by construction.
+function accountBalances() {
+  let bank = 0;
+  let cash = 0;
+  records.forEach((r) => {
+    if (r.type === "transfer") {
+      if (r.from === "bank") { bank -= r.amount; cash += r.amount; }
+      else { bank += r.amount; cash -= r.amount; }
+    } else {
+      const delta = r.type === "income" ? r.amount : -r.amount;
+      if ((r.account || "bank") === "bank") bank += delta;
+      else cash += delta;
+    }
+  });
+  return { bank, cash };
+}
+
 function render() {
   const monthRecords = records.filter((r) => inViewMonth(r.date));
   const income = monthRecords
@@ -411,8 +454,11 @@ function render() {
   const allExpense = records
     .filter((r) => r.type === "expense")
     .reduce((sum, r) => sum + r.amount, 0);
+  const { bank, cash } = accountBalances();
 
   balanceEl.textContent = formatMoney(allIncome - allExpense);
+  bankEl.textContent = formatMoney(bank);
+  cashEl.textContent = formatMoney(cash);
   incomeEl.textContent = formatMoney(income);
   expenseEl.textContent = formatMoney(expense);
   monthLabelEl.textContent = monthLabel();
@@ -427,7 +473,7 @@ function render() {
 
   visible.forEach((r) => {
     const li = document.createElement("li");
-    const sign = r.type === "income" ? "+ " : "- ";
+    const sign = r.type === "income" ? "+ " : r.type === "expense" ? "- " : "";
     li.innerHTML = `
       <div class="record-info">
         <span class="record-desc">${escapeHtml(r.description)}</span>

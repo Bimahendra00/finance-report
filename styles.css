@@ -475,6 +475,24 @@ button[type="submit"]:hover {
   white-space: nowrap;
 }
 
+/* Bank / cash pockets */
+
+.card.bank .value { color: #2563eb; }
+.card.cash .value { color: #16a34a; }
+
+.record-amount.transfer { color: #64748b; }
+
+.row.three {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+@media (max-width: 560px) {
+  .row,
+  .row.three {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Month navigator */
 
 .month-nav {
