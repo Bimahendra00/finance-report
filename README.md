@@ -1,8 +1,9 @@
 # Finance Record
 
-A simple personal finance tracker. Add income, expense, and liability
-records, see your balance at a glance, and filter the history. Data is
-stored in the browser via `localStorage` — no backend needed.
+A simple personal finance tracker. Add income and expense records, track
+named liabilities (debts) and pay them down one by one, see your balance at
+a glance, and filter the history. Data is stored in the browser via
+`localStorage` — no backend needed.
 
 ## Run it
 
@@ -15,8 +16,9 @@ python3 -m http.server 8000
 
 ## Features
 
-- Add income / expense / liability records with description, amount, and date
-- Live balance, income, expense, and liability totals
+- Add income / expense records with description, amount, and date
+- Named liabilities with remaining balances, progress bars, and per-liability payments
+- Live balance, income, expense, and total-liability figures
 - Filter records by type
-- Delete records
+- Delete records and liabilities
 - Persists in `localStorage`
