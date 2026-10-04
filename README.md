@@ -35,3 +35,26 @@ offer "Install app" for a fullscreen home-screen icon.
 - Filter records by type
 - Delete records and liabilities
 - Persists in `localStorage`
+- Export / import all data as a JSON backup file
+
+## Android app (Capacitor)
+
+The web app can be wrapped into a native APK. Data then lives in the app's
+own sandbox, so clearing browser data can't wipe it. (Uninstalling the app
+or clearing *its* storage still would — keep an exported backup.)
+
+Prerequisites: Node.js and Android Studio (Studio installs the Android SDK
+for you on first launch).
+
+```bash
+npm install
+npx cap add android   # one-time: generates the native android/ project
+npm run sync          # copies the web files into the project
+```
+
+Then open the `android/` folder in Android Studio and choose
+**Build → Build App Bundle(s) / APK(s) → Build APK(s)**. The APK lands in
+`android/app/build/outputs/apk/debug/`. Copy it to your phone, tap it, and
+allow "install unknown apps" when asked.
+
+After changing the web app, run `npm run sync` again and rebuild in Studio.
