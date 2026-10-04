@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#f4f6f8" />
-  <meta name="description" content="Track income, expenses, liabilities and recurring bills" />
+  <meta name="theme-color" content="#FEF7FF" />
+  <meta name="description" content="Track income, expenses, budgets and liabilities" />
   <title>Finance Record</title>
   <link rel="stylesheet" href="./styles.css" />
   <link rel="manifest" href="./manifest.json" />
@@ -61,44 +61,19 @@
         </div>
       </section>
 
-      <section class="form-section">
-        <h2>Add record</h2>
-        <form id="record-form">
-          <div class="row">
-            <div class="field">
-              <label for="description">Description</label>
-              <input type="text" id="description" placeholder="e.g. Salary, Groceries" required />
-            </div>
-            <div class="field">
-              <label for="amount">Amount</label>
-              <input type="text" id="amount" inputmode="decimal" placeholder="e.g. 1.500.000" required />
-            </div>
-          </div>
-          <div class="row three">
-            <div class="field">
-              <label for="type">Type</label>
-              <select id="type">
-                <option value="income">Income</option>
-                <option value="expense">Expense</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="account">Account</label>
-              <select id="account">
-                <option value="bank">Bank</option>
-                <option value="cash">Cash</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="date">Date</label>
-              <input type="date" id="date" required />
-            </div>
-          </div>
-          <button type="submit">Add record</button>
+      <section class="card-section">
+        <h2>Budgets</h2>
+        <p class="hint">Monthly spending limits per category.</p>
+        <form id="budget-form" class="inline-form">
+          <select id="budget-cat"></select>
+          <input type="text" id="budget-amount" inputmode="decimal" placeholder="500.000" required />
+          <button type="submit" class="btn-primary">Add</button>
         </form>
+        <ul id="budgets"></ul>
+        <p class="empty" id="budget-empty-msg">No budgets yet. Set a monthly limit above.</p>
       </section>
 
-      <section class="rec-section">
+      <section class="card-section">
         <h2>Move money</h2>
         <p class="hint">Shift money between bank and cash — not income, not an expense.</p>
         <form id="move-form" class="inline-form">
@@ -111,12 +86,12 @@
         </form>
       </section>
 
-      <section class="backup-section">
+      <section class="card-section">
         <h2>Backup</h2>
         <p class="hint">Save your data to a file, or restore it from one.</p>
         <div class="backup-actions">
-          <button id="export-btn" class="btn-secondary">Export data</button>
-          <button id="import-btn" class="btn-secondary">Import data</button>
+          <button id="export-btn" class="btn-tonal">Export data</button>
+          <button id="import-btn" class="btn-tonal">Import data</button>
           <input type="file" id="import-file" accept="application/json,.json" hidden />
         </div>
       </section>
@@ -134,12 +109,12 @@
           </div>
         </div>
         <ul id="records"></ul>
-        <p class="empty" id="empty-msg">No records yet. Add your first one above.</p>
+        <p class="empty" id="empty-msg">No records yet. Tap + to add your first one.</p>
       </section>
     </div>
 
     <div class="tab-page" id="page-debts">
-      <section class="liab-section">
+      <section class="card-section">
         <h2>Liabilities</h2>
         <form id="liability-form">
           <div class="row">
@@ -152,7 +127,7 @@
               <input type="text" id="liab-amount" inputmode="decimal" placeholder="e.g. 1.500.000" required />
             </div>
           </div>
-          <button type="submit">Add liability</button>
+          <button type="submit" class="btn-primary">Add liability</button>
         </form>
         <ul id="liabilities"></ul>
         <p class="empty" id="liab-empty-msg">No liabilities. Add one above.</p>
@@ -160,7 +135,7 @@
     </div>
 
     <div class="tab-page" id="page-bills">
-      <section class="rec-section">
+      <section class="card-section">
         <h2>Recurring</h2>
         <p class="hint">Checking an item logs it as an expense for this period.</p>
         <form id="recurring-form" class="inline-form">
@@ -187,24 +162,54 @@
         <input type="text" id="pay-amount" inputmode="decimal" placeholder="e.g. 1.500.000" />
       </div>
       <div class="modal-actions">
-        <button id="pay-cancel" class="btn-secondary">Cancel</button>
+        <button id="pay-cancel" class="btn-tonal">Cancel</button>
         <button id="pay-confirm" class="btn-primary">Pay</button>
       </div>
     </div>
   </div>
 
-  <nav class="tabbar">
+  <div class="scrim" id="sheet-scrim" hidden></div>
+  <section class="sheet" id="quick-sheet" hidden aria-label="Add record">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <h2>New record</h2>
+      <button id="sheet-close" class="icon-btn" title="Close">✕</button>
+    </div>
+    <div class="segmented" id="qa-type">
+      <button type="button" class="seg-btn active" data-value="expense">Expense</button>
+      <button type="button" class="seg-btn" data-value="income">Income</button>
+    </div>
+    <input type="text" id="qa-amount" class="amount-big" inputmode="decimal" placeholder="0" autocomplete="off" />
+    <div class="cat-grid" id="qa-cats"></div>
+    <div class="field">
+      <input type="text" id="qa-desc" placeholder="Note (optional)" />
+    </div>
+    <div class="row">
+      <div class="segmented" id="qa-account">
+        <button type="button" class="seg-btn active" data-value="bank">Bank</button>
+        <button type="button" class="seg-btn" data-value="cash">Cash</button>
+      </div>
+      <div class="field">
+        <input type="date" id="qa-date" />
+      </div>
+    </div>
+    <button id="qa-save" class="btn-primary btn-block">Save</button>
+  </section>
+
+  <button id="fab" class="fab" title="Add record">+</button>
+
+  <nav class="navbar">
     <button class="tab-btn active" data-tab="home">
-      <span class="tab-icon">🏠</span><span class="tab-label">Home</span>
+      <span class="tab-pill"><span class="tab-icon">🏠</span></span><span class="tab-label">Home</span>
     </button>
     <button class="tab-btn" data-tab="records">
-      <span class="tab-icon">🧾</span><span class="tab-label">Records</span>
+      <span class="tab-pill"><span class="tab-icon">🧾</span></span><span class="tab-label">Records</span>
     </button>
     <button class="tab-btn" data-tab="debts">
-      <span class="tab-icon">💳</span><span class="tab-label">Debts</span>
+      <span class="tab-pill"><span class="tab-icon">💳</span></span><span class="tab-label">Debts</span>
     </button>
     <button class="tab-btn" data-tab="bills">
-      <span class="tab-icon">🔁</span><span class="tab-label">Bills</span>
+      <span class="tab-pill"><span class="tab-icon">🔁</span></span><span class="tab-label">Bills</span>
     </button>
   </nav>
 

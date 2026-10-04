@@ -20,8 +20,11 @@ offer "Install app" for a fullscreen home-screen icon.
 
 ## Features
 
-- Phone-style bottom tab navigation: Home, Records, Debts, Bills
-- Light/dark theme (follows system, toggle in header)
+- Material 3 interface with light/dark theme (follows system, toggle in header)
+- Phone-style bottom navigation bar: Home, Records, Debts, Bills
+- Floating + button with a quick-add bottom sheet: pick expense/income, tap a category, enter the amount — two taps and it's logged
+- Categories with icons on every record (Food, Transport, Shopping, Bills, Health, Fun, Education, Salary, ...)
+- Monthly budgets per category with progress bars ("Rp X of Rp Y", amount left / over)
 - Installable PWA with offline support
 
 - Add income / expense records with description, amount, date, and account (bank or cash)

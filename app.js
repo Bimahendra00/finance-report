@@ -1,4 +1,3 @@
-const form = document.getElementById("record-form");
 const recordsList = document.getElementById("records");
 const emptyMsg = document.getElementById("empty-msg");
 const balanceEl = document.getElementById("balance");
@@ -8,6 +7,26 @@ const incomeEl = document.getElementById("total-income");
 const expenseEl = document.getElementById("total-expense");
 const liabilityEl = document.getElementById("total-liability");
 const filterBtns = document.querySelectorAll(".filter");
+
+// Quick-add bottom sheet
+const fab = document.getElementById("fab");
+const sheet = document.getElementById("quick-sheet");
+const scrim = document.getElementById("sheet-scrim");
+const sheetClose = document.getElementById("sheet-close");
+const qaType = document.getElementById("qa-type");
+const qaAmount = document.getElementById("qa-amount");
+const qaCats = document.getElementById("qa-cats");
+const qaDesc = document.getElementById("qa-desc");
+const qaAccount = document.getElementById("qa-account");
+const qaDate = document.getElementById("qa-date");
+const qaSave = document.getElementById("qa-save");
+
+// Budgets
+const budgetForm = document.getElementById("budget-form");
+const budgetCat = document.getElementById("budget-cat");
+const budgetAmount = document.getElementById("budget-amount");
+const budgetList = document.getElementById("budgets");
+const budgetEmptyMsg = document.getElementById("budget-empty-msg");
 
 const liabForm = document.getElementById("liability-form");
 const liabList = document.getElementById("liabilities");
@@ -35,7 +54,7 @@ function applyTheme(t) {
     localStorage.setItem("finance-theme", t);
   } catch (e) {}
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute("content", t === "dark" ? "#0f172a" : "#f4f6f8");
+  if (meta) meta.setAttribute("content", t === "dark" ? "#141218" : "#FEF7FF");
 }
 themeBtn.addEventListener("click", () => {
   applyTheme(document.documentElement.classList.contains("dark") ? "light" : "dark");
@@ -59,10 +78,40 @@ if ("serviceWorker" in navigator) {
 const STORAGE_KEY = "finance-records";
 const LIAB_KEY = "finance-liabilities";
 const REC_KEY = "finance-recurring";
+const BUDGET_KEY = "finance-budgets";
+
+// Built-in categories. Records store the category id.
+const CATEGORIES = {
+  expense: [
+    { id: "food", name: "Food", icon: "🍔" },
+    { id: "transport", name: "Transport", icon: "🚌" },
+    { id: "shopping", name: "Shopping", icon: "🛍️" },
+    { id: "bills", name: "Bills", icon: "🧾" },
+    { id: "health", name: "Health", icon: "💊" },
+    { id: "fun", name: "Fun", icon: "🎬" },
+    { id: "education", name: "Education", icon: "📚" },
+    { id: "other-expense", name: "Other", icon: "⋯" },
+  ],
+  income: [
+    { id: "salary", name: "Salary", icon: "💼" },
+    { id: "business", name: "Business", icon: "📈" },
+    { id: "gift", name: "Gift", icon: "🎁" },
+    { id: "other-income", name: "Other", icon: "⋯" },
+  ],
+};
+
+function catById(id) {
+  for (const t of ["expense", "income"]) {
+    const c = CATEGORIES[t].find((c) => c.id === id);
+    if (c) return c;
+  }
+  return { id: "other-expense", name: "Other", icon: "⋯" };
+}
 
 let records = loadRecords();
 let liabilities = loadLiabilities();
 let recurring = loadRecurring();
+let budgets = loadBudgets();
 let activeFilter = "all";
 let payingId = null;
 
@@ -103,27 +152,103 @@ function inViewMonth(dateStr) {
 
 migrateOldLiabilityRecords();
 
-document.getElementById("date").valueAsDate = new Date();
+// Quick-add bottom sheet ---------------------------------------------
 
-form.addEventListener("submit", (e) => {
-  e.preventDefault();
+let qaCategory = null;
 
-  const record = {
+function segValue(el) {
+  return el.querySelector(".seg-btn.active").dataset.value;
+}
+
+function setSeg(el, value) {
+  el.querySelectorAll(".seg-btn").forEach((b) =>
+    b.classList.toggle("active", b.dataset.value === value)
+  );
+}
+
+function renderQaCats() {
+  const type = segValue(qaType);
+  qaCats.innerHTML = "";
+  qaCategory = null;
+  CATEGORIES[type].forEach((c, i) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "cat-chip" + (i === 0 ? " active" : "");
+    b.dataset.id = c.id;
+    b.innerHTML = `<span class="cat-icon">${c.icon}</span><span>${c.name}</span>`;
+    if (i === 0) qaCategory = c.id;
+    qaCats.appendChild(b);
+  });
+}
+
+function openSheet() {
+  setSeg(qaType, "expense");
+  setSeg(qaAccount, "bank");
+  renderQaCats();
+  qaAmount.value = "";
+  qaDesc.value = "";
+  qaDate.value = todayISO();
+  sheet.hidden = false;
+  scrim.hidden = false;
+  document.body.classList.add("no-scroll");
+  setTimeout(() => qaAmount.focus(), 60);
+}
+
+function closeSheet() {
+  sheet.hidden = true;
+  scrim.hidden = true;
+  document.body.classList.remove("no-scroll");
+}
+
+qaType.addEventListener("click", (e) => {
+  const btn = e.target.closest(".seg-btn");
+  if (!btn) return;
+  setSeg(qaType, btn.dataset.value);
+  renderQaCats();
+});
+
+qaAccount.addEventListener("click", (e) => {
+  const btn = e.target.closest(".seg-btn");
+  if (!btn) return;
+  setSeg(qaAccount, btn.dataset.value);
+});
+
+qaCats.addEventListener("click", (e) => {
+  const chip = e.target.closest(".cat-chip");
+  if (!chip) return;
+  qaCats.querySelectorAll(".cat-chip").forEach((c) => c.classList.remove("active"));
+  chip.classList.add("active");
+  qaCategory = chip.dataset.id;
+});
+
+qaSave.addEventListener("click", () => {
+  const amount = parseAmount(qaAmount.value);
+  if (isNaN(amount) || amount <= 0) {
+    qaAmount.focus();
+    return;
+  }
+  const type = segValue(qaType);
+  const cat = catById(qaCategory || CATEGORIES[type][0].id);
+  records.unshift({
     id: Date.now(),
-    description: document.getElementById("description").value.trim(),
-    amount: parseAmount(document.getElementById("amount").value),
-    type: document.getElementById("type").value,
-    account: document.getElementById("account").value,
-    date: document.getElementById("date").value,
-  };
-
-  if (!record.description || isNaN(record.amount) || record.amount <= 0) return;
-
-  records.unshift(record);
+    description: qaDesc.value.trim() || cat.name,
+    amount,
+    type,
+    account: segValue(qaAccount),
+    date: qaDate.value || todayISO(),
+    category: cat.id,
+  });
   saveRecords();
   render();
-  form.reset();
-  document.getElementById("date").valueAsDate = new Date();
+  renderBudgets();
+  closeSheet();
+});
+
+fab.addEventListener("click", openSheet);
+sheetClose.addEventListener("click", closeSheet);
+scrim.addEventListener("click", closeSheet);
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !sheet.hidden) closeSheet();
 });
 
 // Transfers move money between pockets: not income, not an expense.
@@ -241,6 +366,7 @@ payConfirmBtn.addEventListener("click", () => {
     amount: paid,
     type: "expense",
     date: todayISO(),
+    category: "bills",
     liabilityId: liab.id,
   });
   saveRecords();
@@ -293,6 +419,7 @@ recList.addEventListener("change", (e) => {
       amount: item.amount,
       type: "expense",
       date: todayISO(),
+      category: "bills",
       recurringId: item.id,
       period: key,
     });
@@ -364,7 +491,7 @@ function currentPeriodKey(period) {
 
 // Format amount fields with thousand separators on blur,
 // so what you typed is easy to verify.
-["amount", "liab-amount", "pay-amount", "rec-amount", "move-amount"].forEach((id) => {
+["qa-amount", "budget-amount", "liab-amount", "pay-amount", "rec-amount", "move-amount"].forEach((id) => {
   document.getElementById(id).addEventListener("blur", (e) => {
     if (e.target.value.trim()) e.target.value = formatInputAmount(e.target.value);
   });
@@ -372,7 +499,12 @@ function currentPeriodKey(period) {
 
 function loadRecords() {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    const arr = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    // Backfill a category for records saved before categories existed.
+    return arr.map((r) => ({
+      ...r,
+      category: r.category || (r.type === "income" ? "other-income" : "other-expense"),
+    }));
   } catch {
     return [];
   }
@@ -404,6 +536,18 @@ function saveLiabilities() {
 
 function saveRecurring() {
   localStorage.setItem(REC_KEY, JSON.stringify(recurring));
+}
+
+function loadBudgets() {
+  try {
+    return JSON.parse(localStorage.getItem(BUDGET_KEY)) || [];
+  } catch {
+    return [];
+  }
+}
+
+function saveBudgets() {
+  localStorage.setItem(BUDGET_KEY, JSON.stringify(budgets));
 }
 
 // One-time migration from the old flat "liability" record type
@@ -505,10 +649,12 @@ function render() {
   visible.forEach((r) => {
     const li = document.createElement("li");
     const sign = r.type === "income" ? "+ " : r.type === "expense" ? "- " : "";
+    const cat = catById(r.category);
     li.innerHTML = `
+      <span class="cat-icon">${cat.icon}</span>
       <div class="record-info">
         <span class="record-desc">${escapeHtml(r.description)}</span>
-        <span class="record-date">${r.date}</span>
+        <span class="record-date">${r.date} · ${cat.name}</span>
       </div>
       <div class="record-right">
         <span class="record-amount ${r.type}">${sign}${formatMoney(r.amount)}</span>
@@ -516,6 +662,7 @@ function render() {
       </div>`;
     recordsList.appendChild(li);
   });
+  renderBudgets();
 }
 
 function renderLiabilities() {
@@ -559,6 +706,70 @@ render();
 renderLiabilities();
 renderRecurring();
 
+// Budgets: monthly spending limits per category ------------------------
+
+function currentMonthKey(d = new Date()) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function budgetSpent(catId) {
+  const mk = currentMonthKey();
+  return records
+    .filter((r) => r.type === "expense" && r.category === catId && (r.date || "").slice(0, 7) === mk)
+    .reduce((sum, r) => sum + r.amount, 0);
+}
+
+function renderBudgets() {
+  budgetList.innerHTML = "";
+  budgetEmptyMsg.style.display = budgets.length ? "none" : "block";
+  budgets.forEach((b) => {
+    const cat = catById(b.category);
+    const spent = budgetSpent(b.category);
+    const pct = b.amount > 0 ? Math.min(100, Math.round((spent / b.amount) * 100)) : 0;
+    const left = b.amount - spent;
+    const li = document.createElement("li");
+    li.className = "budget-item" + (left < 0 ? " over" : "");
+    li.innerHTML = `
+      <span class="cat-icon">${cat.icon}</span>
+      <div class="budget-info">
+        <div class="budget-top"><strong>${escapeHtml(cat.name)}</strong><span>${formatMoney(spent)} of ${formatMoney(b.amount)}</span></div>
+        <div class="progress"><div class="progress-fill${left < 0 ? " over" : ""}" style="width: ${pct}%"></div></div>
+        <div class="budget-sub">${left >= 0 ? formatMoney(left) + " left" : formatMoney(-left) + " over budget"}</div>
+      </div>
+      <button class="delete-btn" data-id="${b.id}" title="Delete budget">&times;</button>`;
+    budgetList.appendChild(li);
+  });
+}
+
+CATEGORIES.expense.forEach((c) => {
+  const o = document.createElement("option");
+  o.value = c.id;
+  o.textContent = `${c.icon} ${c.name}`;
+  budgetCat.appendChild(o);
+});
+
+budgetForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const amount = parseAmount(budgetAmount.value);
+  if (isNaN(amount) || amount <= 0) return;
+  if (budgets.some((b) => b.category === budgetCat.value)) {
+    alert("A budget for this category already exists.");
+    return;
+  }
+  budgets.push({ id: Date.now(), category: budgetCat.value, amount });
+  saveBudgets();
+  renderBudgets();
+  budgetForm.reset();
+});
+
+budgetList.addEventListener("click", (e) => {
+  const del = e.target.closest(".delete-btn");
+  if (!del) return;
+  budgets = budgets.filter((b) => b.id !== Number(del.dataset.id));
+  saveBudgets();
+  renderBudgets();
+});
+
 // Bottom tab navigation ----------------------------------------------
 
 document.querySelectorAll(".tab-btn").forEach((btn) => {
@@ -580,11 +791,12 @@ const importFile = document.getElementById("import-file");
 exportBtn.addEventListener("click", () => {
   const data = {
     app: "finance-report",
-    version: 1,
+    version: 2,
     exportedAt: new Date().toISOString(),
     records,
     liabilities,
     recurring,
+    budgets,
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -615,11 +827,12 @@ importFile.addEventListener("change", () => {
         throw new Error("bad shape");
       }
       const when = data.exportedAt ? data.exportedAt.slice(0, 10) : "unknown date";
+      const budgetCount = Array.isArray(data.budgets) ? data.budgets.length : 0;
       if (
         !confirm(
           `Import backup from ${when}? This replaces all current data. ` +
           `(${data.records.length} records, ${data.liabilities.length} liabilities, ` +
-          `${data.recurring.length} recurring bills)`
+          `${data.recurring.length} recurring bills, ${budgetCount} budgets)`
         )
       ) {
         return;
@@ -627,12 +840,15 @@ importFile.addEventListener("change", () => {
       records = data.records;
       liabilities = data.liabilities;
       recurring = data.recurring;
+      budgets = Array.isArray(data.budgets) ? data.budgets : [];
       saveRecords();
       saveLiabilities();
       saveRecurring();
+      saveBudgets();
       render();
       renderLiabilities();
       renderRecurring();
+      renderBudgets();
     } catch (e) {
       alert("That file doesn't look like a finance-report backup.");
     } finally {
